@@ -18,7 +18,15 @@ async function run() {
         await client.connect();
         const database = client.db('niche_website');
         const productsCollection = database.collection('products');
-        console.log('Database connected successfully')
+
+        // get all products
+        app.get('/products', async (req, res) => {
+            const cursor = productsCollection.find({});
+            const product = await cursor.toArray();
+            res.json(product);
+        })
+
+
     }
     finally {
         // await client.close();
