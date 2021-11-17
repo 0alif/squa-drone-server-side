@@ -20,15 +20,16 @@ async function run() {
         const database = client.db('niche_website');
         const productsCollection = database.collection('products');
         const ordersCollection = database.collection('allOrders');
+        const usersCollection = database.collection('users');
 
-        // get all products
+        // all products api
         app.get('/products', async (req, res) => {
             const cursor = productsCollection.find({});
             const product = await cursor.toArray();
             res.json(product);
         });
 
-        // get single product
+        // single product api
         app.get('/products/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
@@ -36,17 +37,52 @@ async function run() {
             res.json(product);
         })
 
-        // get all order
+        // single order api
+        app.get('/allOrders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const order = await ordersCollection.findOne(query);
+            res.json(order);
+        })
+
+        // specific user orders api
         app.get('/allOrders', async (req, res) => {
-            const cursor = ordersCollection.find({});
+            const email = req.query.email;
+            const query = { email: email }
+            const cursor = ordersCollection.find(query);
             const product = await cursor.toArray();
             res.json(product);
         })
 
-        // post  an order
+        // post order api
         app.post('/allOrders', async (req, res) => {
             const order = req.body;
             const result = await ordersCollection.insertOne(order);
+            res.json(result);
+        })
+
+        // delete order api
+        app.delete('/allOrders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await ordersCollection.deleteOne(query);
+            res.json(result);
+        })
+
+        // user api
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const result = await usersCollection.insertOne(user);
+            res.json(result);
+        })
+
+        // update user
+        app.put('/users', async (req, res) => {
+            const user = req.body;
+            const filter = { email: user.email };
+            const options = { upsert: true };
+            const updateDoc = { $set: user };
+            const result = await usersCollection.updateOne(filter, updateDoc, options);
             res.json(result);
         })
 
